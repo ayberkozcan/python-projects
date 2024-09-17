@@ -1,5 +1,7 @@
 from tkinter import *
 import customtkinter
+from datetime import datetime
+import os
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -7,7 +9,7 @@ customtkinter.set_default_color_theme("dark-blue")
 root = customtkinter.CTk()
 
 root.title("Tkinter - BMI Calculator")
-root.geometry("600x750")
+root.geometry("600x800")
 
 current_theme = "dark"
 
@@ -26,14 +28,20 @@ def clear_screen():
     results.configure(text="")
     h_entry.focus()
 
+    save_button.pack_forget()
+
 def get_bmi():
     if validate_input():
+        if int(h_entry.get()) <= 0:
+            results.configure(text="Please enter valid height!", text_color="red")
+            return
+
+        if int(w_entry.get()) <= 0:
+            results.configure(text="Please enter valid weight!", text_color="red")
+            return
+
         our_height = int(h_entry.get())/100 * int(h_entry.get())/100
         our_weight = int(w_entry.get())
-
-        if our_weight == 0:
-            results.configure(text="Weight cannot be 0!", text_color="red")
-            return
 
         bmi = our_weight / our_height
         bmi_rounded = round(bmi, 1)
@@ -52,6 +60,8 @@ def get_bmi():
             results.configure(text=f"{str(bmi_rounded)}\nExtreme Obese", text_color="red")
         else:
             results.configure(text="Please enter valid numbers.", text_color="red")
+
+        save_button.pack(pady=20)
     
 def validate_input():
     try:
@@ -60,8 +70,27 @@ def validate_input():
         return True
     except ValueError:
         results.configure(text="Please enter valid numbers.", text_color="red")
+        save_button.pack_forget()
         return False
+    
+def save_data():
+    now = datetime.now()
+    day = now.day
+    month = now.month
+    year = now.year
 
+    file_exists = os.path.isfile("bmi_data.txt")
+
+    with open("bmi_data.txt", "a") as file:
+        if not file_exists:
+            file.write("Height, Weight, Day, Month, Year\n")
+
+        file.write(f"{h_entry.get()}, {w_entry.get()}, {day}, {month}, {year}\n")
+
+    results.configure(text="Data saved.", text_color="green")
+    
+    save_button.pack_forget()
+    
 # Switch Theme
 theme_icon = PhotoImage(file="theme_icon.png")
 theme_icon = theme_icon.subsample(7, 7)
@@ -110,6 +139,13 @@ button_2 = customtkinter.CTkButton(master=root,
     command=clear_screen)
 button_2.pack(pady=20)
 
+save_button = customtkinter.CTkButton(master=root,
+    text="Save Data",
+    width=190,
+    height=40,
+    command=save_data)
+save_button.pack_forget()
+
 # Results
 results = customtkinter.CTkLabel(master=root,
     text="",
@@ -123,6 +159,6 @@ button_3 = customtkinter.CTkButton(master=root,
     height=40,
     compound="top",
     command=root.destroy)
-button_3.pack(pady=20)
+button_3.pack(side=BOTTOM, pady=20)
 
 root.mainloop()
