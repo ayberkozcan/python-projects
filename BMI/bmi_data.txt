@@ -1,0 +1,3 @@
+Height, Weight, Day, Month, Year
+178, 90, 18, 9, 2024
+178, 80, 18, 9, 2024
