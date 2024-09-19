@@ -15,6 +15,7 @@ current_theme = "dark"
 
 def switch_theme():
     global current_theme
+
     if current_theme == "dark":
         customtkinter.set_appearance_mode("light")
         current_theme = "light"
@@ -22,9 +23,17 @@ def switch_theme():
         customtkinter.set_appearance_mode("dark")
         current_theme = "dark"
 
+def focus_next_entry(event, next_entry):
+    next_entry.focus()
+
 def show_previous_data():
     global header
 
+    for widget in root.winfo_children():
+        if header_homepage != widget:
+            widget.pack_forget()
+            widget.place_forget()
+        
     homepage_icon = PhotoImage(file="homepage_icon.png")
     homepage_icon = homepage_icon.subsample(9, 9)
 
@@ -32,45 +41,62 @@ def show_previous_data():
     homepage_button.place(x=500, y=40)
 
     try:
-        theme_button.place_forget()
-        records_button.place_forget()
-        h_entry.pack_forget()
-        w_entry.pack_forget()
-        button_1.pack_forget()
-        button_2.pack_forget()
-        results.pack_forget()
-        button_3.pack_forget()
-
         with open("bmi_data.txt", "r") as file:
             lines = file.readlines()
 
         if len(lines) > 1:
-            header = customtkinter.CTkLabel(master=root, text="Height - Weight - Date", font=("Helvetica", 25))
+            header = customtkinter.CTkLabel(master=root, text="History", font=("Helvetica", 25))
             header.pack(pady=10)
 
-            for line in lines[1:]:
+            records_frame = customtkinter.CTkFrame(master=root)
+            records_frame.pack(pady=10, fill="x")
+
+            for i, line in enumerate(lines[1:], start=1):
                 line = line.strip()
                 height, weight, day, month, year = line.split(", ")
                 formatted_line = f"{height} cm - {weight} kg - {day}/{month}/{year}"
-                record_label = customtkinter.CTkLabel(master=root, text=formatted_line, font=("Helvetica", 20))
-                record_label.pack()
-        
+                
+                record_label = customtkinter.CTkLabel(master=records_frame, text=formatted_line, font=("Helvetica", 20))
+                record_label.grid(row=i, column=0, padx=10, pady=5, sticky='w')
+
+                delete_button = customtkinter.CTkButton(master=records_frame, text="Delete", command=lambda idx=i: delete_record(idx), fg_color="red", width=30)
+                delete_button.grid(row=i, column=1, padx=10, pady=5, sticky='w')
+
         else:
-            results.configure(text="No Data Available", text_color="red")
-        
+            header = customtkinter.CTkLabel(master=root, text="No Data Available", font=("Helvetica", 25), text_color="red")
+            header.pack(pady=10)
+
+    except FileNotFoundError:
+        header = customtkinter.CTkLabel(master=root, text="No Data Available", font=("Helvetica", 25), text_color="red")
+        header.pack(pady=10)
+
+def delete_record(record_index):
+    try:
+        with open("bmi_data.txt", "r") as file:
+            lines = file.readlines()
+
+        if 0 < record_index < len(lines):
+            del lines[record_index]
+
+            with open("bmi_data.txt", "w") as file:
+                file.writelines(lines)
+            
+        show_previous_data()
+
     except FileNotFoundError:
         header.configure(text="No Data Available", text_color="red")
 
 def show_homepage():
+    global header_homepage
+
     for widget in root.winfo_children():
-        widget.pack_forget()
-        widget.place_forget()
+        if header_homepage != widget:
+            widget.pack_forget()
+            widget.place_forget()
 
     theme_button.place(x=50, y=40)
     records_button.place(x=500, y=40)
 
-    header = customtkinter.CTkLabel(master=root, text="BMI Calculator", font=("Helvetica", 40))
-    header.pack(pady=50)
     h_entry.pack(pady=20)
     w_entry.pack(pady=20)
     button_1.pack(pady=20)
@@ -151,21 +177,31 @@ def save_data():
 theme_icon = PhotoImage(file="theme_icon.png")
 theme_icon = theme_icon.subsample(7, 7)
 
-theme_button = customtkinter.CTkButton(master=root, image=theme_icon, text="", command=switch_theme, width=40, height=40)
+theme_button = customtkinter.CTkButton(master=root, 
+    image=theme_icon, 
+    text="",
+    command=switch_theme, 
+    width=40, 
+    height=40)
 theme_button.place(x=50, y=40)
 
 # Records
 records_icon = PhotoImage(file="history.png")
 records_icon = records_icon.subsample(9, 9)
 
-records_button = customtkinter.CTkButton(master=root, image=records_icon, text="", command=show_previous_data, width=40, height=40)
+records_button = customtkinter.CTkButton(master=root, 
+    image=records_icon, 
+    text="", 
+    command=show_previous_data, 
+    width=40, 
+    height=40)
 records_button.place(x=500, y=40)
 
 # Header
-header = customtkinter.CTkLabel(master=root,
+header_homepage = customtkinter.CTkLabel(master=root,
     text="BMI Calculator",
-    font=("Helvetica", 40),)
-header.pack(pady=50)
+    font=("Helvetica", 40))
+header_homepage.pack(pady=50)
 
 # Entry Boxes
 h_entry = customtkinter.CTkEntry(master=root, 
@@ -175,6 +211,7 @@ h_entry = customtkinter.CTkEntry(master=root,
     border_width=1,
     corner_radius=10)
 h_entry.pack(pady=20)
+h_entry.bind("<Return>", lambda event: focus_next_entry(event, w_entry))
 
 w_entry = customtkinter.CTkEntry(master=root, 
     placeholder_text="Weight (kg)", 
@@ -183,6 +220,7 @@ w_entry = customtkinter.CTkEntry(master=root,
     border_width=1,
     corner_radius=10)
 w_entry.pack(pady=20)
+w_entry.bind("<Return>", lambda event: button_1.invoke())
 
 # Buttons
 button_1 = customtkinter.CTkButton(master=root,
