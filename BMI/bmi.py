@@ -2,6 +2,10 @@ from tkinter import *
 import customtkinter
 from datetime import datetime
 import os
+import pandas as pd
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.dates import DateFormatter
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -34,33 +38,36 @@ def show_previous_data():
             widget.pack_forget()
             widget.place_forget()
         
-    homepage_icon = PhotoImage(file="homepage_icon.png")
+    homepage_icon = PhotoImage(file="icons/homepage_icon.png")
     homepage_icon = homepage_icon.subsample(9, 9)
 
     homepage_button = customtkinter.CTkButton(master=root, image=homepage_icon, text="", command=show_homepage, width=40, height=40)
     homepage_button.place(x=500, y=40)
 
     try:
-        with open("bmi_data.txt", "r") as file:
-            lines = file.readlines()
+        df = read_data_to_dataframe()
 
-        if len(lines) > 1:
-            header = customtkinter.CTkLabel(master=root, text="History", font=("Helvetica", 25))
-            header.pack(pady=10)
-
+        if not df.empty:
             records_frame = customtkinter.CTkFrame(master=root)
             records_frame.pack(pady=10, fill="x")
 
-            for i, line in enumerate(lines[1:], start=1):
-                line = line.strip()
-                height, weight, day, month, year = line.split(", ")
-                formatted_line = f"{height} cm - {weight} kg - {day}/{month}/{year}"
-                
+            for i, row in enumerate(df.itertuples(), start=1):
+                height = row[1]
+                weight = row[2]
+                date_str = row[3].strftime('%d/%m/%Y')
+
+                formatted_line = f"{height} cm - {weight} kg - {date_str}"
+
                 record_label = customtkinter.CTkLabel(master=records_frame, text=formatted_line, font=("Helvetica", 20))
                 record_label.grid(row=i, column=0, padx=10, pady=5, sticky='w')
 
                 delete_button = customtkinter.CTkButton(master=records_frame, text="Delete", command=lambda idx=i: delete_record(idx), fg_color="red", width=30)
-                delete_button.grid(row=i, column=1, padx=10, pady=5, sticky='w')
+                delete_button.grid(row=i, column=1, padx=10, pady=5)
+
+            graph_frame = customtkinter.CTkFrame(master=root)
+            graph_frame.pack(pady=20, fill="both", expand=True)
+
+            plot_weight_over_time(df, graph_frame)
 
         else:
             header = customtkinter.CTkLabel(master=root, text="No Data Available", font=("Helvetica", 25), text_color="red")
@@ -173,8 +180,48 @@ def save_data():
     
     save_button.pack_forget()
     
+def read_data_to_dataframe():
+    try:
+        with open("bmi_data.txt", "r") as file:
+            lines = file.readlines()
+
+        data = []
+        for line in lines[1:]:
+            line = line.strip()
+            height, weight, day, month, year = line.split(", ")
+            date_str = f"{day}/{month}/{year}"
+            data.append([int(height), int(weight), date_str])
+
+        df = pd.DataFrame(data, columns=["Height (cm)", "Weight (kg)", "Date"])
+        df['Date'] = pd.to_datetime(df['Date'], format="%d/%m/%Y")
+        return df
+
+    except FileNotFoundError:
+        print("File not found!")
+        return pd.DataFrame()
+
+def plot_weight_over_time(df, parent_frame):
+    df["Date"] = pd.to_datetime(df["Date"])
+
+    fig, ax = plt.subplots(figsize=(5, 5))
+    ax.plot(df['Date'], df['Weight (kg)'], marker='o', linestyle='-', color='blue')
+
+    date_format = DateFormatter("%m-%d")
+    ax.xaxis.set_major_formatter(date_format)
+
+    plt.xticks(rotation=45)
+
+    ax.set_xlabel("Date")
+    ax.set_ylabel("Weight (kg)")
+    ax.set_title("Weight Change Over Time")
+    ax.grid(True)
+
+    canvas = FigureCanvasTkAgg(fig, master=parent_frame)
+    canvas.draw()
+    canvas.get_tk_widget().pack(pady=10)
+
 # Switch Theme
-theme_icon = PhotoImage(file="theme_icon.png")
+theme_icon = PhotoImage(file="icons/theme_icon.png")
 theme_icon = theme_icon.subsample(7, 7)
 
 theme_button = customtkinter.CTkButton(master=root, 
@@ -186,7 +233,7 @@ theme_button = customtkinter.CTkButton(master=root,
 theme_button.place(x=50, y=40)
 
 # Records
-records_icon = PhotoImage(file="history.png")
+records_icon = PhotoImage(file="icons/history.png")
 records_icon = records_icon.subsample(9, 9)
 
 records_button = customtkinter.CTkButton(master=root, 
