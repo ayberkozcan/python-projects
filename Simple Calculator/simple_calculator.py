@@ -4,16 +4,24 @@ class CalculatorApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
+        ctk.set_default_color_theme("dark-blue")
+
         self.title("Calculator")
-        self.geometry("800*600")
+        self.geometry("800*400")
 
         self.result = ctk.StringVar()
 
         self.widgets()
 
     def widgets(self):
-        self.result_entry = ctk.CTkEntry(self, textvariable=self.result, state="readonly", width=200)
-        self.result_entry.grid(row=0, column=0, pady=20)
+        self.result_entry = ctk.CTkEntry(
+            self, 
+            textvariable=self.result, 
+            state="readonly", 
+            height=100, 
+            width=450, 
+            font=("Helvetica", 30))
+        self.result_entry.grid(row=0, column=0, columnspan=4, padx=10, pady=10)
 
         buttons = [ 
             ("7", 2, 0), ("8", 2, 1), ("9", 2, 2),               
@@ -23,7 +31,14 @@ class CalculatorApp(ctk.CTk):
         ]
 
         for (text, row, column) in buttons:
-            button = ctk.CTkButton(self, text=text, command=lambda t=text: self.append_number(t))
+            button = ctk.CTkButton(
+                self, 
+                text=text, 
+                command=lambda t=text: self.append_number(t),
+                fg_color="#4A90E2",
+                hover_color="#6EB5FF",
+                height=70, 
+                width=100)
             button.grid(row=row, column=column, padx=10, pady=10)
 
         operations = [
@@ -31,14 +46,29 @@ class CalculatorApp(ctk.CTk):
         ]
 
         for (text, command) in operations:
-            button = ctk.CTkButton(self, text=text, command=lambda cmd=command: self.set_operation(cmd))
-            button.grid(row=operations.index((text, command))+2, column=3, padx=10, pady=10)
+            button = ctk.CTkButton(
+                self, 
+                text=text, 
+                command=lambda cmd=command: self.set_operation(cmd), 
+                height=70, 
+                width=100)
+            button.grid(row=operations.index((text, command))+2, column=3, padx=5, pady=5)
 
-        equals_button = ctk.CTkButton(self, text="=", command=self.calculate)
-        equals_button.grid(row=5, column=2, padx=10, pady=10)
+        equals_button = ctk.CTkButton(
+            self, 
+            text="=", 
+            command=self.calculate, 
+            height=70, 
+            width=100)
+        equals_button.grid(row=5, column=2, padx=5, pady=5)
 
-        clear_button = ctk.CTkButton(self, text="C", command=self.clear)
-        clear_button.grid(row=5, column=0, padx=10, pady=10)
+        clear_button = ctk.CTkButton(
+            self, 
+            text="C", 
+            command=self.clear, 
+            height=70, 
+            width=100)
+        clear_button.grid(row=5, column=0, padx=5, pady=5)
 
     def append_number(self, number):
         current_text = self.result.get()
