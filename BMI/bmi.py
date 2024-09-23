@@ -17,6 +17,11 @@ root.geometry("600x800")
 
 current_theme = "dark"
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+history_icon_path = os.path.join(BASE_DIR, "icons/history.png")
+homepage_icon_path = os.path.join(BASE_DIR, "icons/homepage_icon.png")
+theme_icon_path = os.path.join(BASE_DIR, "icons/theme_icon.png")
+
 def switch_theme():
     global current_theme
 
@@ -38,7 +43,7 @@ def show_previous_data():
             widget.pack_forget()
             widget.place_forget()
         
-    homepage_icon = PhotoImage(file="icons/homepage_icon.png")
+    homepage_icon = PhotoImage(file=homepage_icon_path)
     homepage_icon = homepage_icon.subsample(9, 9)
 
     homepage_button = customtkinter.CTkButton(master=root, image=homepage_icon, text="", command=show_homepage, width=40, height=40)
@@ -221,7 +226,7 @@ def plot_weight_over_time(df, parent_frame):
     canvas.get_tk_widget().pack(pady=10)
 
 # Switch Theme
-theme_icon = PhotoImage(file="icons/theme_icon.png")
+theme_icon = PhotoImage(file=theme_icon_path)
 theme_icon = theme_icon.subsample(7, 7)
 
 theme_button = customtkinter.CTkButton(master=root, 
@@ -233,7 +238,7 @@ theme_button = customtkinter.CTkButton(master=root,
 theme_button.place(x=50, y=40)
 
 # Records
-records_icon = PhotoImage(file="icons/history.png")
+records_icon = PhotoImage(file=history_icon_path)
 records_icon = records_icon.subsample(9, 9)
 
 records_button = customtkinter.CTkButton(master=root, 
