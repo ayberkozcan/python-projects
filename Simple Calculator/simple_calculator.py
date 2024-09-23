@@ -1,98 +1,80 @@
-import time
-import os
-import sys
+import customtkinter as ctk
 
-def collect(x, y):
-    return x + y
+class CalculatorApp(ctk.CTk):
+    def __init__(self):
+        super().__init__()
 
-def ext(x, y):
-    return x - y
+        self.title("Calculator")
+        self.geometry("800*600")
 
-def imp(x, y):
-    return x * y
+        self.result = ctk.StringVar()
 
-def div(x, y):
-    return x / y
+        self.widgets()
 
-def get_number_input(prompt):
-    while True:
-        user_input = input(prompt)
-        if user_input.lstrip('-').isdigit():
-            return int(user_input)
+    def widgets(self):
+        self.result_entry = ctk.CTkEntry(self, textvariable=self.result, state="readonly", width=200)
+        self.result_entry.grid(row=0, column=0, pady=20)
+
+        buttons = [ 
+            ("7", 2, 0), ("8", 2, 1), ("9", 2, 2),               
+            ("4", 3, 0), ("5", 3, 1), ("6", 3, 2),   
+            ("1", 4, 0), ("2", 4, 1), ("3", 4, 2),   
+            ("0", 5, 1)          
+        ]
+
+        for (text, row, column) in buttons:
+            button = ctk.CTkButton(self, text=text, command=lambda t=text: self.append_number(t))
+            button.grid(row=row, column=column, padx=10, pady=10)
+
+        operations = [
+            ("+", self.collect), ("-", self.ext), ("*", self.imp), ("/", self.div)
+        ]
+
+        for (text, command) in operations:
+            button = ctk.CTkButton(self, text=text, command=lambda cmd=command: self.set_operation(cmd))
+            button.grid(row=operations.index((text, command))+2, column=3, padx=10, pady=10)
+
+        equals_button = ctk.CTkButton(self, text="=", command=self.calculate)
+        equals_button.grid(row=5, column=2, padx=10, pady=10)
+
+        clear_button = ctk.CTkButton(self, text="C", command=self.clear)
+        clear_button.grid(row=5, column=0, padx=10, pady=10)
+
+    def append_number(self, number):
+        current_text = self.result.get()
+        self.result.set(current_text + number)
+
+    def set_operation(self, operation):
+        self.first_number = int(self.result.get())
+        self.result.set("")
+        self.operation = operation
+
+    def collect(self, x, y):
+        return x + y
+
+    def ext(self, x, y):
+        return x - y
+
+    def imp(self, x, y):
+        return x * y
+
+    def div(self, x, y):
+        if y == 0:
+            return "Division by zero is not allowed."
+        return x / y
+
+    def calculate(self):
+        second_number = int(self.result.get())
+        result = self.operation(self.first_number, second_number)
+        
+        if isinstance(result, str):
+            self.result.set(result)
         else:
-            print("Invalid input, please enter a valid number.")
+            self.result.set(result)
 
-print("Welcome To The Calculator")
+    def clear(self):
+        self.result.set("")
 
-time.sleep(2)
-
-os.system('cls')
-
-select_start = 0
-begin_select = 0
-select = 0
-
-while select_start == 0:
-    print("Press a to continue... ")
-    begin = input()
-
-    if begin == "a":
-        while select != 5:
-            print("************************")
-            print("(1) Collection")
-            print("(2) Extraction")
-            print("(3) Impact")
-            print("(4) Divide")
-            print("(5) Quit")
-
-            print("Choose the action...")
-
-            user_input = input()
-
-            if user_input.isdigit():
-                select = int(user_input)
-            else:
-                print("Invalid input, please enter a number between 1 and 5.")
-                continue
-
-            if select == 1:
-                no1 = get_number_input("Enter the first number: ")
-                no2 = get_number_input("Enter the second number: ")
-                result = collect(no1, no2)
-                print(f"{no1} + {no2} = {result}")
-                time.sleep(2)
-
-            elif select == 2:
-                no1 = get_number_input("Enter the first number: ")
-                no2 = get_number_input("Enter the second number: ")
-                result = ext(no1, no2)
-                print(f"{no1} - {no2} = {result}")
-                time.sleep(2)
-
-            elif select == 3:
-                no1 = get_number_input("Enter the first number: ")
-                no2 = get_number_input("Enter the second number: ")
-                result = imp(no1, no2)
-                print(f"{no1} * {no2} = {result}")
-                time.sleep(2)
-
-            elif select == 4:
-                no1 = get_number_input("Enter the first number: ")
-                no2 = get_number_input("Enter the second number: ")
-                if no2 != 0:
-                    result = div(no1, no2)
-                    print(f"{no1} / {no2} = {result}")
-                else:
-                    print("Error: Division by zero is not allowed.")
-                time.sleep(2)
-
-            elif select == 5:
-                print("See you later!")
-                time.sleep(2)
-                sys.exit()
-
-            else:
-                print("Invalid selection, please choose a valid option.")
-
-    else:
-        continue
+if __name__ == "__main__":
+    app = CalculatorApp()
+    app.mainloop()
