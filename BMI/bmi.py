@@ -13,7 +13,7 @@ customtkinter.set_default_color_theme("dark-blue")
 root = customtkinter.CTk()
 
 root.title("Tkinter - BMI Calculator")
-root.geometry("600x800")
+root.geometry("600x850")
 
 current_theme = "dark"
 
@@ -175,9 +175,16 @@ def save_data():
 
     file_exists = os.path.isfile("bmi_data.txt")
 
-    with open("bmi_data.txt", "a") as file:
+    with open("bmi_data.txt", "a+") as file:
+        file.seek(0)
+        lines = file.readlines()
+
         if not file_exists:
             file.write("Height, Weight, Day, Month, Year\n")
+
+        if len(lines) > 10:
+            results.configure(text="Data cannot be saved (Max Limit)", text_color="red")
+            return
 
         file.write(f"{h_entry.get()}, {w_entry.get()}, {day}, {month}, {year}\n")
 
@@ -208,7 +215,10 @@ def read_data_to_dataframe():
 def plot_weight_over_time(df, parent_frame):
     df["Date"] = pd.to_datetime(df["Date"])
 
-    fig, ax = plt.subplots(figsize=(5, 5))
+    num_data_points = len(df)
+    fig_width = max(5, num_data_points * 0.5)
+
+    fig, ax = plt.subplots(figsize=(fig_width, 5))
     ax.plot(df['Date'], df['Weight (kg)'], marker='o', linestyle='-', color='blue')
 
     date_format = DateFormatter("%m-%d")
@@ -311,7 +321,7 @@ button_3 = customtkinter.CTkButton(master=root,
     width=190,
     height=40,
     compound="top",
-    command=root.destroy)
+    command=root.quit)
 button_3.pack(side=BOTTOM, pady=20)
 
 root.mainloop()

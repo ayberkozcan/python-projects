@@ -7,7 +7,7 @@ class CalculatorApp(ctk.CTk):
         ctk.set_default_color_theme("dark-blue")
 
         self.title("Calculator")
-        self.geometry("800*400")
+        #self.geometry("475x480")
 
         self.result = ctk.StringVar()
 
