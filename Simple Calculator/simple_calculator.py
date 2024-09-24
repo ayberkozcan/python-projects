@@ -8,7 +8,8 @@ class CalculatorApp(ctk.CTk):
 
         self.title("Calculator")
         #self.geometry("475x480")
-
+        self.control = 0
+        self.numbers = [0, 0]
         self.result = ctk.StringVar()
 
         self.widgets()
@@ -75,7 +76,10 @@ class CalculatorApp(ctk.CTk):
         self.result.set(current_text + number)
 
     def set_operation(self, operation):
-        self.first_number = int(self.result.get())
+        if self.control == 0:
+            self.numbers[0] = int(self.result.get())
+        else:
+            self.numbers[1] = int(self.result.get())
         self.result.set("")
         self.operation = operation
 
@@ -94,8 +98,13 @@ class CalculatorApp(ctk.CTk):
         return x / y
 
     def calculate(self):
-        second_number = int(self.result.get())
-        result = self.operation(self.first_number, second_number)
+        if self.control == 0:
+            self.control = 1
+            self.numbers[1] = int(self.result.get())
+            result = self.operation(self.numbers[0], self.numbers[1])
+        else:
+            self.numbers[0] = int(self.result.get())
+            result = self.operation(self.numbers[0], self.numbers[1])
         
         if isinstance(result, str):
             self.result.set(result)
@@ -103,6 +112,8 @@ class CalculatorApp(ctk.CTk):
             self.result.set(result)
 
     def clear(self):
+        self.numbers = [0, 0]
+        self.control = 0
         self.result.set("")
 
 if __name__ == "__main__":
