@@ -15,6 +15,7 @@ class ToDoApp(ctk.CTk):
 
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         self.theme_icon_path = os.path.join(BASE_DIR, "icons/theme_icon.png")
+        self.add_task_icon_path = os.path.join(BASE_DIR, "icons/add_task_icon.png")
 
         self.widgets()
 
@@ -27,6 +28,30 @@ class ToDoApp(ctk.CTk):
             ctk.set_appearance_mode("dark")
             self.current_theme = "dark"
 
+    def create_task(self):
+        self.add_entry_button.pack_forget()
+        self.add_entry.pack(pady=10)
+        self.add_task_button.pack(pady=10)
+
+    def add_task(self):
+        task = self.add_entry.get()
+
+        if task:
+            with open("tasks.txt", "a") as file:
+                file.write(f"{task}\n")
+            self.result.configure(text="Task Saved!", text_color="green")
+        else:
+            self.result.configure(text="No task entered!", text_color="red")
+
+        self.after(2000, self.clear_message)
+
+        self.add_entry.pack_forget()
+        self.add_task_button.pack_forget()
+        self.add_entry_button.pack(pady=10)
+
+    def clear_message(self):
+        self.result.configure(text="")
+
     def widgets(self):
         self.header_homepage = ctk.CTkLabel(
             self,
@@ -35,9 +60,8 @@ class ToDoApp(ctk.CTk):
         )
         self.header_homepage.pack(pady=50)
 
-
         theme_icon = PhotoImage(file=self.theme_icon_path)
-        theme_icon = theme_icon.subsample(7, 7)
+        theme_icon = theme_icon.subsample(8, 8)
 
         self.theme_button = ctk.CTkButton(
             self,
@@ -47,18 +71,44 @@ class ToDoApp(ctk.CTk):
             width=40,
             height=40
         )
-        self.theme_button.place(x=50, y=40)
-
+        self.theme_button.place(x=400, y=40)
 
         self.add_entry = ctk.CTkEntry(
             self,
-            placeholder_text="Add a Task",
+            placeholder_text="...",
             width=200,
             height=30,
             border_width=1,
             corner_radius=10
             )
-        self.add_entry.pack(pady=20)
+
+        add_task_icon = PhotoImage(file=self.add_task_icon_path)
+        add_task_icon = add_task_icon.subsample(10, 10)
+
+        self.add_entry_button = ctk.CTkButton(
+            self,
+            image=add_task_icon,
+            text="",
+            command=self.create_task,
+            width=40,
+            height=40
+        )
+        self.add_entry_button.pack(pady=10)
+
+        self.add_task_button = ctk.CTkButton(
+            self,
+            text="Add Task",
+            command=self.add_task,
+            width=100,
+            height=40
+        )
+
+        self.result = ctk.CTkLabel(
+            self,
+            text="",
+            font=("Helvetica", 28),
+        )
+        self.result.pack(pady=50)
 
 if __name__ == "__main__":
     app = ToDoApp()
