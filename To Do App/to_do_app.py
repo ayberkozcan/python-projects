@@ -37,16 +37,25 @@ class ToDoApp(ctk.CTk):
         self.add_task_button.pack(pady=10)
 
     def add_task(self):
-        task = self.add_entry.get()
+        try:
+            with open("tasks.txt", "r") as file:
+                tasks = file.readlines()
+        except FileNotFoundError:
+            tasks = []
 
-        if task:
-            with open("tasks.txt", "a") as file:
-                file.write(f"{task}\n")
-            self.result.configure(text="Task Saved!", text_color="green")
-            self.task_list()
+        if len(tasks) >= 8:
+            self.result.configure(text="Task limit reached! (8 max)", text_color="red")
         else:
-            self.result.configure(text="No task entered!", text_color="red")
+            task = self.add_entry.get()
 
+            if task:
+                with open("tasks.txt", "a") as file:
+                    file.write(f"{task}\n")
+                self.result.configure(text="Task Saved!", text_color="green")
+                self.task_list()
+            else:
+                self.result.configure(text="No task entered!", text_color="red")
+        
         self.after(2000, self.clear_message)
 
         self.add_entry.pack_forget()
@@ -55,6 +64,22 @@ class ToDoApp(ctk.CTk):
 
     def clear_message(self):
         self.result.configure(text="")
+
+    def complete_task(self, task_index):
+        try:
+            with open("tasks.txt", "r") as file:
+                lines = file.readlines()
+
+            if 0 <= task_index - 1 < len(lines):
+                lines[task_index - 1] = f"[x] {lines[task_index - 1].lstrip('[x]').strip()}\n"
+
+                with open("tasks.txt", "w") as file:
+                    file.writelines(lines)
+
+            self.task_list()
+
+        except FileNotFoundError:
+            self.result.configure(text="No Tasks Available...", text_color="gray")
 
     def task_list(self):
         if hasattr(self, 'records_frame'):
@@ -73,7 +98,11 @@ class ToDoApp(ctk.CTk):
                 for i, task in enumerate(tasks, start=1):
                     formatted_task = task.strip()
 
-                    task_label = ctk.CTkLabel(master=self.records_frame, text=formatted_task, font=("Helvetica", 20))
+                    if formatted_task.startswith("[x]"):
+                        task_label = ctk.CTkLabel(master=self.records_frame, text=formatted_task[4:], font=("Helvetica", 20, "overstrike"))
+                    else:
+                        task_label = ctk.CTkLabel(master=self.records_frame, text=formatted_task, font=("Helvetica", 20))
+
                     task_label.grid(row=i, column=0, padx=10, pady=5, sticky='w')
                     self.task_labels.append(task_label)
 
@@ -85,19 +114,6 @@ class ToDoApp(ctk.CTk):
 
             else:
                 self.result.configure(text="No Tasks Available...", text_color="gray")
-
-        except FileNotFoundError:
-            self.result.configure(text="No Tasks Available...", text_color="gray")
-
-    def complete_task(self, task_index):
-        try:
-            with open("tasks.txt", "r") as file:
-                lines = file.readlines()
-
-            if 0 <= task_index - 1 < len(lines):
-                self.task_labels[task_index - 1].configure(font=("Helvetica", 20, "overstrike"))
-
-                self.task_list()
 
         except FileNotFoundError:
             self.result.configure(text="No Tasks Available...", text_color="gray")
@@ -160,7 +176,7 @@ class ToDoApp(ctk.CTk):
             width=40,
             height=40
         )
-        self.add_entry_button.pack(side="bottom", pady=40)
+        self.add_entry_button.pack(side="bottom", pady=50)
 
         self.add_task_button = ctk.CTkButton(
             self,
@@ -186,124 +202,3 @@ class ToDoApp(ctk.CTk):
 if __name__ == "__main__":
     app = ToDoApp()
     app.mainloop()
-
-# def edit(selection):
-#     edit = input("Enter the task...\n")
-#     task[selection-1] = edit
-
-# def remove(selection):
-#     task.remove(task[selection-1])
-
-# def error_selection(selection):
-#     while True:
-#         try:    
-#             selection = int(input("Enter a number: "))
-#             break
-#         except ValueError:
-#             print("Invalid entry. Please enter a number")
-#     return selection
-
-# def display(task):
-#     print("\nYour Tasks")
-    
-#     if len(task) == 0:
-#         print("You don't have any task!\n")    
-#     else:
-#         print("---------------------------------")
-#         i = 0
-#         while i < len(task):
-#             print(" * " + str(task[i]))
-#             i = i + 1
-#         print("---------------------------------")
-
-# menu_inside_select = 0
-# task = []
-# i = 0
-# usage_index = 0
-
-# print("TO DO APP\n")
-
-# time.sleep(1)
-
-# print("Loading...\n")
-
-# time.sleep(2)
-
-# try:
-#     with open("todoapp.txt", "x"):
-#         pass
-# except FileExistsError:
-#     print("...\n")
-
-# with open("todoapp.txt","r") as file:
-#     task = file.readlines()
-
-# while menu_inside_select != 4:
-        
-#     os.system('cls')
-        
-#     display(task)
-        
-#     time.sleep(1)
-        
-#     print("(1) Add new task")
-#     print("(2) Edit task")
-#     print("(3) Remove task")
-#     print("(4) Quit")
-    
-#     menu_inside_select = error_selection(menu_inside_select)
-    
-#     if menu_inside_select == 1:
-#         add = input("Enter the task: ")
-#         task.append(add)
-        
-#     elif menu_inside_select == 2:
-        
-#         if len(task) == 0:
-#             print("You don't have any task!")
-#             break
-        
-#         print("Select the task you want to edit")
-        
-#         while True:
-            
-#             menu_inside_select = error_selection(menu_inside_select)
-            
-#             if menu_inside_select <= len(task):
-#                 edit(menu_inside_select)
-#                 break
-#             else:
-#                 print("Try again")
-        
-#     elif menu_inside_select == 3:
-        
-#         if len(task) == 0:
-#             print("You don't have any task!")
-#             break
-        
-#         print("Select the task you want to delete")
-    
-#         while True:                
-#             menu_inside_select = error_selection(menu_inside_select)
-            
-#             if menu_inside_select <= len(task):
-#                 remove(menu_inside_select)
-#                 break
-#             else:
-#                 print("Try again")
-        
-#     elif menu_inside_select == 4:
-        
-#         print("See you later!!!")
-#         time.sleep(2)
-        
-#         with open("todoapp.txt","w") as file:
-#             i = 0
-#             while i < len(task):
-#                 file.write(task[i].rstrip() + "\n")
-#                 i = i + 1
-        
-#         sys.exit()
-    
-#     else:
-#         print("Try again")
