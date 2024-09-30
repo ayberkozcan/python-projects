@@ -75,6 +75,28 @@ class CalculatorApp(ctk.CTk):
             font=("Helvetica", 20))
         clear_button.grid(row=5, column=0, padx=5, pady=5)
 
+        self.bind_keys()
+
+    def on_key_press(self, event):
+        key = event.char
+        if key.isdigit():
+            self.append_number(key)
+        elif key == "+":
+            self.set_operation(self.collect)
+        elif key == "-":
+            self.set_operation(self.ext)
+        elif key == "*":
+            self.set_operation(self.imp)
+        elif key == "/":
+            self.set_operation(self.div)
+        elif key == "=" or key == "\r":
+            self.calculate()
+        elif key.lower() == "c":
+            self.clear()
+
+    def bind_keys(self):
+        self.bind("<Key>", self.on_key_press)
+
     def append_number(self, number):
         current_text = self.result.get()
         self.result.set(current_text + number)
