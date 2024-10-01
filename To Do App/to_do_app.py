@@ -1,4 +1,5 @@
 from tkinter import *
+from datetime import datetime
 import customtkinter as ctk
 import os
 
@@ -49,10 +50,12 @@ class ToDoApp(ctk.CTk):
             task = self.add_entry.get()
 
             if task:
+                current_date = datetime.now().strftime("%d/%m/%Y")
                 with open("tasks.txt", "a") as file:
-                    file.write(f"{task}\n")
+                    file.write(f"{current_date} - {task}\n")
                 self.result.configure(text="Task Saved!", text_color="green")
                 self.task_list()
+                self.add_entry.delete(0, END)
             else:
                 self.result.configure(text="No task entered!", text_color="red")
         
@@ -71,8 +74,11 @@ class ToDoApp(ctk.CTk):
                 lines = file.readlines()
 
             if 0 <= task_index - 1 < len(lines):
-                lines[task_index - 1] = f"[x] {lines[task_index - 1].lstrip('[x]').strip()}\n"
-
+                if lines[task_index - 1].startswith("[x]"):
+                    lines[task_index - 1] = f"{lines[task_index - 1].lstrip('[x]').strip()}\n"
+                else:
+                    lines[task_index - 1] = f"[x] {lines[task_index - 1].strip()}\n"
+            
                 with open("tasks.txt", "w") as file:
                     file.writelines(lines)
 
@@ -164,6 +170,8 @@ class ToDoApp(ctk.CTk):
             border_width=1,
             corner_radius=10
             )
+        
+        self.add_entry.bind("<Return>", lambda event: self.add_task())
 
         add_task_icon = PhotoImage(file=self.add_task_icon_path)
         add_task_icon = add_task_icon.subsample(10, 10)
