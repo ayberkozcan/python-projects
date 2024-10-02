@@ -9,3 +9,6 @@ The Simple Calculator is a user-friendly application created using customtkinter
 ## To Do App
 
 The To-Do App is a task management tool with a simple graphical interface built using customtkinter. Users can add tasks through an input field, view the list of tasks, and delete entries when they are no longer needed. The app also stores tasks in a file, allowing users to keep track of their to-do items persistently.
+
+
+### All of the projects above includes GUI with customtkinter
