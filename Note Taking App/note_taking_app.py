@@ -22,7 +22,7 @@ class NoteTakingApp(ctk.CTk):
         theme_icon = PhotoImage(file=self.theme_icon_path)
         theme_icon = theme_icon.subsample(8, 8)
 
-        theme_button = ctk.CTkButton(
+        self.theme_button = ctk.CTkButton(
             self,
             image=theme_icon,
             text="",
@@ -30,16 +30,34 @@ class NoteTakingApp(ctk.CTk):
             width=40,
             height=40
         )
-        theme_button.place(x=500, y=500)
+        self.theme_button.place(x=500, y=500)
         
-        note_entry = ctk.CTkTextbox(
+        self.note_entry = ctk.CTkTextbox(
             self,
             width=500,
-            height=200,
+            height=300,
             border_width=1,
             corner_radius=10
         )
-        note_entry.pack(pady=20)
+        self.note_entry.pack(pady=20)
+
+        save_note_button = ctk.CTkButton(
+            self,
+            text="Save Note",
+            fg_color="#bb0000",
+            hover_color="#a70000",
+            command=self.save_note,
+            width=50,
+            height=50
+        )
+        save_note_button.place(x=50, y=350)
+
+        self.result_label = ctk.CTkLabel(
+            self,
+            text="",
+            font=("Helvetica", 20)
+        )
+        self.result_label.place(x=250, y=450)
         
     def switch_theme(self):
         if self.current_theme == "dark":
@@ -48,6 +66,21 @@ class NoteTakingApp(ctk.CTk):
         else:
             ctk.set_appearance_mode("dark")
             self.current_theme = "dark"
+
+    def save_note(self):
+        note_content = self.note_entry.get("1.0", "end-1c")
+
+        with open("notes.txt", "w") as file:
+            file.write(note_content)
+
+        self.result_label.configure(text="Note Saved!", text_color="#03c000")
+        
+        self.note_entry.delete("1.0", END)
+
+        self.after(1000, self.clear_message)
+
+    def clear_message(self):
+        self.result_label.configure(text="")
 
 if __name__ == "__main__":
     app = NoteTakingApp()
