@@ -1,6 +1,7 @@
 from tkinter import *
 import customtkinter as ctk
 import os
+from datetime import datetime
 
 class NoteTakingApp(ctk.CTk):
     def __init__(self):
@@ -92,9 +93,19 @@ class NoteTakingApp(ctk.CTk):
         note_content = self.note_entry.get("1.0", "end-1c")
         note_title = self.title_note_entry.get()
 
+        if note_title.strip() == "":
+            self.result_label.configure(text="Title is required!", text_color="red")
+            return
+
         notes_directory = "notes/"
-        with open(notes_directory+note_title+".txt", "w") as file:
-            file.write(note_content)
+        if not os.path.exists(notes_directory):
+            os.makedirs(notes_directory)
+
+        note_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        note_data = f"Title: {note_title}\nDate: {note_date}\n\n{note_content}"
+
+        with open(os.path.join(notes_directory, note_title + ".txt"), "w") as file:
+            file.write(note_data)
 
         self.result_label.configure(text="Note Saved!", text_color="#03c000")
         
@@ -113,7 +124,17 @@ class NoteTakingApp(ctk.CTk):
         new_window.geometry("400x300")
 
         for i, file_name in enumerate(files, start=1):
-            formatted_label = file_name.strip()
+            file_path = os.path.join(notes_directory, file_name)
+            with open(file_path, "r") as file:
+                lines = file.readlines()
+                if len(lines) > 1:
+                    note_title = lines[0].replace("Title: ", "").strip()
+                    note_date = lines[1].replace("Date: ", "").strip()
+                else:
+                    note_title = file_name.strip(".txt")
+                    note_date = "Unknown"
+
+            formatted_label = f"{note_title} ({note_date})"
 
             label = ctk.CTkLabel(new_window, text=formatted_label)
             label.grid(row=i, column=0, padx=10, pady=5, sticky="w")
