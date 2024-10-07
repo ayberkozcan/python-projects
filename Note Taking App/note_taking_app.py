@@ -159,12 +159,24 @@ class NoteTakingApp(ctk.CTk):
                 new_window,
                 image=delete_icon,
                 text="",
-                #command=lambda idx=i: self.delete_note(idx),
+                command=lambda file_name=file_name: self.delete_note(file_name), 
                 fg_color="red",
                 width=30
             )
             delete_button.grid(row=i, column=2, padx=10, pady=5)
 
+    def delete_note(self, file_name):
+        notes_directory = "notes/"
+        file_path = os.path.join(notes_directory, file_name)
+
+        if os.path.exists(file_path):
+            os.remove(file_path)
+            self.result_label.configure(text=f"{file_name} deleted!", text_color="red")
+        else:
+            self.result_label.configure(text="File not found!", text_color="red")
+
+    self.after(2000, self.clear_message)
+    
     def clear_message(self):
         self.result_label.configure(text="")
 
