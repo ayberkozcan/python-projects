@@ -114,14 +114,14 @@ class NoteTakingApp(ctk.CTk):
 
         self.after(1000, self.clear_message)
 
-    def list_manage_notes(self):
+    def list_manage_notes(self, window=None):
         notes_directory = "notes"
-
         files = os.listdir(notes_directory)
 
-        new_window = ctk.CTkToplevel(self)
-        new_window.title("List of Notes")
-        new_window.geometry("400x300")
+        if window is None:
+            window = ctk.CTkToplevel(self)
+            window.title("List of Notes")
+            window.geometry("400x300")
 
         for i, file_name in enumerate(files, start=1):
             file_path = os.path.join(notes_directory, file_name)
@@ -136,17 +136,16 @@ class NoteTakingApp(ctk.CTk):
 
             formatted_label = f"{note_title} ({note_date})"
 
-            label = ctk.CTkLabel(new_window, text=formatted_label)
+            label = ctk.CTkLabel(window, text=formatted_label)
             label.grid(row=i, column=0, padx=10, pady=5, sticky="w")
 
             edit_icon = PhotoImage(file=self.edit_icon_path)
             edit_icon = edit_icon.subsample(25, 25)
 
             edit_button = ctk.CTkButton(
-                new_window,
+                window,
                 image=edit_icon,
                 text="",
-                #command=lambda idx=i: self.edit_note(idx),
                 fg_color="green",
                 width=30
             )
@@ -156,27 +155,34 @@ class NoteTakingApp(ctk.CTk):
             delete_icon = delete_icon.subsample(25, 25)
 
             delete_button = ctk.CTkButton(
-                new_window,
+                window,
                 image=delete_icon,
                 text="",
-                command=lambda file_name=file_name: self.delete_note(file_name), 
+                command=lambda file_name=file_name: self.delete_note(file_name, window), 
                 fg_color="red",
                 width=30
             )
             delete_button.grid(row=i, column=2, padx=10, pady=5)
 
-    def delete_note(self, file_name):
+    def delete_note(self, file_name, window):
         notes_directory = "notes/"
         file_path = os.path.join(notes_directory, file_name)
 
         if os.path.exists(file_path):
             os.remove(file_path)
             self.result_label.configure(text=f"{file_name} deleted!", text_color="red")
+            self.update_note_list(window)
         else:
             self.result_label.configure(text="File not found!", text_color="red")
 
-    self.after(2000, self.clear_message)
-    
+        self.after(2000, self.clear_message)
+
+    def update_note_list(self, window):
+        for widget in window.winfo_children():
+            widget.destroy()
+        
+        self.list_manage_notes(window)
+
     def clear_message(self):
         self.result_label.configure(text="")
 
