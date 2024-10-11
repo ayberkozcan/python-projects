@@ -146,6 +146,7 @@ class NoteTakingApp(ctk.CTk):
                 window,
                 image=edit_icon,
                 text="",
+                command=lambda file_name=file_name: self.edit_note(file_name),
                 fg_color="green",
                 width=30
             )
@@ -178,8 +179,8 @@ class NoteTakingApp(ctk.CTk):
                 self.title_note_entry.delete(0, END)
                 self.title_note_entry.insert(0, note_title)
 
-                self.title_note_entry.delete("1.0", END)
-                self.title_note_entry.insert("1.0", note_content)
+                self.note_entry.delete("1.0", END)
+                self.note_entry.insert("1.0", note_content)
 
             self.save_note_button.configure(
                 text="Update Note",
@@ -195,7 +196,30 @@ class NoteTakingApp(ctk.CTk):
         note_content = self.note_entry.get("1.0", "end-1c")
         note_title = self.title_note_entry.get()
 
-        ###...
+        if note_title.strip() == "":
+            self.result_label.configure(text="Title is required!", text_color="red")
+            return
+        
+        notes_directory = "notes/"
+        file_path = os.path.join(notes_directory, file_name)
+
+        note_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        note_data = f"Title: {note_title}\nDate: {note_date}\n\n{note_content}"
+
+        with open(file_path, "w") as file:
+            file.write(note_data)
+
+        self.result_label.configure(text="Note Updated!", text_color="green")
+
+        self.title_note_entry.delete(0, END)
+        self.note_entry.delete("1.0", END)
+
+        self.save_note_button.configure(
+            text="Save Note",
+            command=self.create_note
+        )
+
+        self.after(2000, self.clear_message)
 
     def delete_note(self, file_name, window):
         notes_directory = "notes/"
