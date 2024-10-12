@@ -72,7 +72,16 @@ class NoteTakingApp(ctk.CTk):
             width=50,
             height=50
         )
-        self.list_notes_button.place(x=150, y=420)
+        self.list_notes_button.place(x=500, y=420)
+
+        self.customize_button = ctk.CTkButton(
+            self,
+            text="Customize",
+            command=self.customize_text,
+            width=50,
+            height=50
+        )
+        self.customize_button.place(x=150, y=420)
 
         self.result_label = ctk.CTkLabel(
             self,
@@ -114,6 +123,63 @@ class NoteTakingApp(ctk.CTk):
 
         self.after(1000, self.clear_message)
 
+    def customize_text(self):
+        window = ctk.CTkToplevel(self)
+        window.title("Customize")
+        window.geometry("250x250")
+
+        font_label = ctk.CTkLabel(
+            window,
+            text="Font: "
+        )
+        font_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+
+        self.font_comboBox = ctk.CTkComboBox(
+            window,
+            values=["Helvetica", "Arial", "Verdana", "Tahoma"],
+        )
+        self.font_comboBox.set("Helvetica")
+        self.font_comboBox.grid(row=0, column=1, padx=10, pady=10)
+
+        fontsize_label = ctk.CTkLabel(
+            window,
+            text="Size: "
+        )
+        fontsize_label.grid(row=1, column=0, padx=10, pady=10, sticky="w")
+
+        self.fontsize_comboBox = ctk.CTkComboBox(
+            window,
+            values=["2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30"],
+        )
+        self.fontsize_comboBox.set("20")
+        self.fontsize_comboBox.grid(row=1, column=1, padx=10, pady=10)
+
+        self.font_result_label = ctk.CTkLabel(
+            window,
+            text="",
+            font=("Helvetica", 20)
+        )
+        self.font_result_label.grid(row=2, column=1, padx=10, pady=10)
+
+        window.grid_rowconfigure(3, weight=1)
+
+        save_font_changes_button = ctk.CTkButton(
+            window,
+            text="Save Changes",
+            fg_color="green",
+            command=lambda: self.apply_font()
+        )
+        save_font_changes_button.grid(row=3, column=1, padx=10, pady=10)
+
+    def apply_font(self):
+        font = self.font_comboBox.get()
+        font_size = int(self.fontsize_comboBox.get())
+
+        self.note_entry.configure(font=(font, font_size))
+
+        self.font_result_label.configure(text="Font Saved!", text_color="green")
+        self.after(2000, self.font_clear_message)    
+        
     def list_manage_notes(self, window=None):
         notes_directory = "notes"
         files = os.listdir(notes_directory)
@@ -122,6 +188,8 @@ class NoteTakingApp(ctk.CTk):
             window = ctk.CTkToplevel(self)
             window.title("List of Notes")
             window.geometry("400x300")
+        
+        self.window = window
 
         for i, file_name in enumerate(files, start=1):
             file_path = os.path.join(notes_directory, file_name)
@@ -150,7 +218,7 @@ class NoteTakingApp(ctk.CTk):
                 fg_color="green",
                 width=30
             )
-            edit_button.grid(row=i, column=1, padx=10, pady=5)
+            edit_button.grid(row=i, column=1)
 
             delete_icon = PhotoImage(file=self.delete_icon_path)
             delete_icon = delete_icon.subsample(25, 25)
@@ -163,7 +231,16 @@ class NoteTakingApp(ctk.CTk):
                 fg_color="red",
                 width=30
             )
-            delete_button.grid(row=i, column=2, padx=10, pady=5)
+            delete_button.grid(row=i, column=2)
+
+        window.grid_rowconfigure(len(files)+1, weight=1)
+
+        self.clear_screen_button = ctk.CTkButton(
+            window,
+            text="Clear Screen",
+            command=self.clear_screen
+        )
+        self.clear_screen_button.grid(row=len(files) + 2, column=1, pady=10)
 
     def edit_note(self, file_name):
         notes_directory = "notes/"
@@ -242,6 +319,18 @@ class NoteTakingApp(ctk.CTk):
 
     def clear_message(self):
         self.result_label.configure(text="")
+
+    def font_clear_message(self):
+        self.font_result_label.configure(text="")
+
+    def clear_screen(self):
+        self.title_note_entry.delete(0, END)
+        self.note_entry.delete("1.0", END)
+
+        for widget in self.winfo_children():
+            widget.destroy()
+
+        self.widgets()
 
 if __name__ == "__main__":
     app = NoteTakingApp()
