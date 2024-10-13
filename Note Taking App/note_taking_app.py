@@ -83,6 +83,15 @@ class NoteTakingApp(ctk.CTk):
         )
         self.customize_button.place(x=150, y=420)
 
+        self.clear_screen_button = ctk.CTkButton(
+            self,
+            text="Clear Screen",
+            command=self.clear_screen,
+            width=50,
+            height=50
+        )
+        self.clear_screen_button.place(x=250, y=420)
+
         self.result_label = ctk.CTkLabel(
             self,
             text="",
@@ -191,6 +200,9 @@ class NoteTakingApp(ctk.CTk):
         
         self.window = window
 
+        notes_scrollable_frame = ctk.CTkScrollableFrame(window, width=380, height=260)
+        notes_scrollable_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
         for i, file_name in enumerate(files, start=1):
             file_path = os.path.join(notes_directory, file_name)
             with open(file_path, "r") as file:
@@ -202,45 +214,39 @@ class NoteTakingApp(ctk.CTk):
                     note_title = file_name.strip(".txt")
                     note_date = "Unknown"
 
+            note_number_label = ctk.CTkLabel(notes_scrollable_frame, text=str(i)+":")
+            note_number_label.grid(row=i, column=0, padx=10, pady=5, sticky="w")
+
             formatted_label = f"{note_title} ({note_date})"
 
-            label = ctk.CTkLabel(window, text=formatted_label)
-            label.grid(row=i, column=0, padx=10, pady=5, sticky="w")
+            label = ctk.CTkLabel(notes_scrollable_frame, text=formatted_label)
+            label.grid(row=i, column=1, padx=10, pady=5)
 
             edit_icon = PhotoImage(file=self.edit_icon_path)
             edit_icon = edit_icon.subsample(25, 25)
 
             edit_button = ctk.CTkButton(
-                window,
+                notes_scrollable_frame,
                 image=edit_icon,
                 text="",
                 command=lambda file_name=file_name: self.edit_note(file_name),
                 fg_color="green",
                 width=30
             )
-            edit_button.grid(row=i, column=1)
+            edit_button.grid(row=i, column=2, padx=10, pady=5)
 
             delete_icon = PhotoImage(file=self.delete_icon_path)
             delete_icon = delete_icon.subsample(25, 25)
 
             delete_button = ctk.CTkButton(
-                window,
+                notes_scrollable_frame,
                 image=delete_icon,
                 text="",
                 command=lambda file_name=file_name: self.delete_note(file_name, window), 
                 fg_color="red",
                 width=30
             )
-            delete_button.grid(row=i, column=2)
-
-        window.grid_rowconfigure(len(files)+1, weight=1)
-
-        self.clear_screen_button = ctk.CTkButton(
-            window,
-            text="Clear Screen",
-            command=self.clear_screen
-        )
-        self.clear_screen_button.grid(row=len(files) + 2, column=1, pady=10)
+            delete_button.grid(row=i, column=3, padx=10, pady=5)
 
     def edit_note(self, file_name):
         notes_directory = "notes/"
