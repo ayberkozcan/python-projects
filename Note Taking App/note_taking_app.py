@@ -14,6 +14,9 @@ class NoteTakingApp(ctk.CTk):
 
         self.current_theme = "dark"
 
+        self.font = "Helvetica"
+        self.font_size = 20
+
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         self.theme_icon_path = os.path.join(BASE_DIR, "icons/theme_icon.png")
         self.edit_icon_path = os.path.join(BASE_DIR, "icons/edit_icon.png")
@@ -98,6 +101,13 @@ class NoteTakingApp(ctk.CTk):
             font=("Helvetica", 20)
         )
         self.result_label.place(x=250, y=500)
+
+        self.warning_label = ctk.CTkLabel(
+            self,
+            text="Don't forget to press the 'Update Note' button after each change!",
+            font=("Helvetica", 15),
+            text_color="yellow"
+        )
         
     def switch_theme(self):
         if self.current_theme == "dark":
@@ -111,6 +121,9 @@ class NoteTakingApp(ctk.CTk):
         note_content = self.note_entry.get("1.0", "end-1c")
         note_title = self.title_note_entry.get()
 
+        note_font = self.font
+        note_font_size = self.font_size
+
         if note_title.strip() == "":
             self.result_label.configure(text="Title is required!", text_color="red")
             return
@@ -120,7 +133,7 @@ class NoteTakingApp(ctk.CTk):
             os.makedirs(notes_directory)
 
         note_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        note_data = f"Title: {note_title}\nDate: {note_date}\n\n{note_content}"
+        note_data = f"Title: {note_title}\nDate: {note_date}\nFont: {note_font}\nFont Size: {note_font_size}\n\n{note_content}"
 
         with open(os.path.join(notes_directory, note_title + ".txt"), "w") as file:
             file.write(note_data)
@@ -147,7 +160,7 @@ class NoteTakingApp(ctk.CTk):
             window,
             values=["Helvetica", "Arial", "Verdana", "Tahoma"],
         )
-        self.font_comboBox.set("Helvetica")
+        self.font_comboBox.set(self.font)
         self.font_comboBox.grid(row=0, column=1, padx=10, pady=10)
 
         fontsize_label = ctk.CTkLabel(
@@ -158,9 +171,9 @@ class NoteTakingApp(ctk.CTk):
 
         self.fontsize_comboBox = ctk.CTkComboBox(
             window,
-            values=["2", "4", "6", "8", "10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30"],
+            values=["10", "12", "14", "16", "18", "20", "22", "24", "26", "28", "30", "32", "34", "36", "38", "40"],
         )
-        self.fontsize_comboBox.set("20")
+        self.fontsize_comboBox.set(self.font_size)
         self.fontsize_comboBox.grid(row=1, column=1, padx=10, pady=10)
 
         self.font_result_label = ctk.CTkLabel(
@@ -181,10 +194,10 @@ class NoteTakingApp(ctk.CTk):
         save_font_changes_button.grid(row=3, column=1, padx=10, pady=10)
 
     def apply_font(self):
-        font = self.font_comboBox.get()
-        font_size = int(self.fontsize_comboBox.get())
+        self.font = self.font_comboBox.get()
+        self.font_size = int(self.fontsize_comboBox.get())
 
-        self.note_entry.configure(font=(font, font_size))
+        self.note_entry.configure(font=(self.font, self.font_size))
 
         self.font_result_label.configure(text="Font Saved!", text_color="green")
         self.after(2000, self.font_clear_message)    
@@ -192,18 +205,10 @@ class NoteTakingApp(ctk.CTk):
     def list_manage_notes(self, window=None):
         notes_directory = "notes"
         files = os.listdir(notes_directory)
-
-        if window is None:
-            window = ctk.CTkToplevel(self)
-            window.title("List of Notes")
-            window.geometry("400x300")
         
-        self.window = window
-
-        notes_scrollable_frame = ctk.CTkScrollableFrame(window, width=380, height=260)
-        notes_scrollable_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
-
-        for i, file_name in enumerate(files, start=1):
+        notes = []
+        
+        for file_name in files:
             file_path = os.path.join(notes_directory, file_name)
             with open(file_path, "r") as file:
                 lines = file.readlines()
@@ -213,12 +218,26 @@ class NoteTakingApp(ctk.CTk):
                 else:
                     note_title = file_name.strip(".txt")
                     note_date = "Unknown"
+            
+            notes.append((file_name, note_title, note_date))
 
-            note_number_label = ctk.CTkLabel(notes_scrollable_frame, text=str(i)+":")
+        notes.sort(key=lambda x: x[2] if x[2] != "Unknown" else "9999-12-31")
+        
+        if window is None:
+            window = ctk.CTkToplevel(self)
+            window.title("List of Notes")
+            window.geometry("400x300")
+        
+        self.window = window
+
+        notes_scrollable_frame = ctk.CTkScrollableFrame(window, width=360, height=260)
+        notes_scrollable_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
+
+        for i, (file_name, note_title, note_date) in enumerate(notes, start=1):
+            note_number_label = ctk.CTkLabel(notes_scrollable_frame, text=str(i) + ":")
             note_number_label.grid(row=i, column=0, padx=10, pady=5, sticky="w")
 
             formatted_label = f"{note_title} ({note_date})"
-
             label = ctk.CTkLabel(notes_scrollable_frame, text=formatted_label)
             label.grid(row=i, column=1, padx=10, pady=5)
 
@@ -256,8 +275,13 @@ class NoteTakingApp(ctk.CTk):
             with open(file_path, "r") as file:
                 lines = file.readlines()
                 if len(lines) > 1:
+                    note_font = lines[2].replace("Font: ", "").strip()
+                    note_font_size = lines[3].replace("Font Size: ", "").strip()
+                    
+                    self.note_entry.configure(font=(note_font, int(note_font_size)))
+
                     note_title = lines[0].replace("Title: ", "").strip()
-                    note_content = "".join(lines[3:])
+                    note_content = "".join(lines[5:])
 
                 self.title_note_entry.delete(0, END)
                 self.title_note_entry.insert(0, note_title)
@@ -269,6 +293,9 @@ class NoteTakingApp(ctk.CTk):
                 text="Update Note",
                 command=lambda: self.update_existing_note(file_name)
             )
+            self.warning_label.place(x=50, y=620)
+            self.warning_label.after(4000, self.warning_clear_message)
+
             self.result_label.configure(text="Note Loaded", text_color="yellow")
         else:
             self.result_label.configure(text="Note not found!", text_color="red")
@@ -279,6 +306,9 @@ class NoteTakingApp(ctk.CTk):
         note_content = self.note_entry.get("1.0", "end-1c")
         note_title = self.title_note_entry.get()
 
+        note_font = self.font
+        note_font_size = self.font_size
+
         if note_title.strip() == "":
             self.result_label.configure(text="Title is required!", text_color="red")
             return
@@ -287,7 +317,7 @@ class NoteTakingApp(ctk.CTk):
         file_path = os.path.join(notes_directory, file_name)
 
         note_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        note_data = f"Title: {note_title}\nDate: {note_date}\n\n{note_content}"
+        note_data = f"Title: {note_title}\nDate: {note_date}\nFont: {note_font}\nFont Size: {note_font_size}\n\n{note_content}"
 
         with open(file_path, "w") as file:
             file.write(note_data)
@@ -325,6 +355,9 @@ class NoteTakingApp(ctk.CTk):
 
     def clear_message(self):
         self.result_label.configure(text="")
+
+    def warning_clear_message(self):
+        self.warning_label.configure(text="")
 
     def font_clear_message(self):
         self.font_result_label.configure(text="")
