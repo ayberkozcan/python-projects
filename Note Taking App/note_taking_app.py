@@ -9,7 +9,7 @@ class NoteTakingApp(ctk.CTk):
 
         ctk.set_default_color_theme("dark-blue")
     
-        self.title("Note Taker")
+        self.title("Note Taking App")
         self.geometry("600x700")
 
         self.current_theme = "dark"
@@ -36,7 +36,7 @@ class NoteTakingApp(ctk.CTk):
             width=40,
             height=40
         )
-        self.theme_button.place(x=500, y=600)
+        self.theme_button.place(x=490, y=600)
         
         self.title_note_entry = ctk.CTkEntry(
             self,
@@ -60,8 +60,8 @@ class NoteTakingApp(ctk.CTk):
         self.save_note_button = ctk.CTkButton(
             self,
             text="Save Note",
-            fg_color="#bb0000",
-            hover_color="#a70000",
+            fg_color="#0bb200",
+            hover_color="#099200",
             command=self.create_note,
             width=50,
             height=50
@@ -70,12 +70,12 @@ class NoteTakingApp(ctk.CTk):
 
         self.list_notes_button = ctk.CTkButton(
             self,
-            text="Notes",
+            text="Note List",
             command=self.list_manage_notes,
             width=50,
             height=50
         )
-        self.list_notes_button.place(x=500, y=420)
+        self.list_notes_button.place(x=490, y=420)
 
         self.customize_button = ctk.CTkButton(
             self,
@@ -188,8 +188,9 @@ class NoteTakingApp(ctk.CTk):
         save_font_changes_button = ctk.CTkButton(
             window,
             text="Save Changes",
-            fg_color="green",
-            command=lambda: self.apply_font()
+            command=lambda: self.apply_font(),
+            fg_color="#0bb200",
+            hover_color="#099200"
         )
         save_font_changes_button.grid(row=3, column=1, padx=10, pady=10)
 
@@ -225,7 +226,7 @@ class NoteTakingApp(ctk.CTk):
         
         if window is None:
             window = ctk.CTkToplevel(self)
-            window.title("List of Notes")
+            window.title("Note List")
             window.geometry("400x300")
         
         self.window = window
@@ -237,9 +238,11 @@ class NoteTakingApp(ctk.CTk):
             note_number_label = ctk.CTkLabel(notes_scrollable_frame, text=str(i) + ":")
             note_number_label.grid(row=i, column=0, padx=10, pady=5, sticky="w")
 
-            formatted_label = f"{note_title} ({note_date})"
-            label = ctk.CTkLabel(notes_scrollable_frame, text=formatted_label)
-            label.grid(row=i, column=1, padx=10, pady=5)
+            note_title_label = ctk.CTkLabel(notes_scrollable_frame, text=note_title)
+            note_title_label.grid(row=i, column=1, padx=10, pady=5)
+
+            note_date_label = ctk.CTkLabel(notes_scrollable_frame, text=note_date)
+            note_date_label.grid(row=i, column=2, padx=10, pady=5)
 
             edit_icon = PhotoImage(file=self.edit_icon_path)
             edit_icon = edit_icon.subsample(25, 25)
@@ -249,10 +252,11 @@ class NoteTakingApp(ctk.CTk):
                 image=edit_icon,
                 text="",
                 command=lambda file_name=file_name: self.edit_note(file_name),
-                fg_color="green",
+                fg_color="#0bb200",
+                hover_color="#099200",
                 width=30
             )
-            edit_button.grid(row=i, column=2, padx=10, pady=5)
+            edit_button.grid(row=i, column=3, padx=10, pady=5)
 
             delete_icon = PhotoImage(file=self.delete_icon_path)
             delete_icon = delete_icon.subsample(25, 25)
@@ -262,10 +266,11 @@ class NoteTakingApp(ctk.CTk):
                 image=delete_icon,
                 text="",
                 command=lambda file_name=file_name: self.delete_note(file_name, window), 
-                fg_color="red",
+                fg_color="#b20000",
+                hover_color="#960000",
                 width=30
             )
-            delete_button.grid(row=i, column=3, padx=10, pady=5)
+            delete_button.grid(row=i, column=4, padx=10, pady=5)
 
     def edit_note(self, file_name):
         notes_directory = "notes/"
