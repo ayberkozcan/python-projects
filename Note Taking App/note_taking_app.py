@@ -18,6 +18,7 @@ class NoteTakingApp(ctk.CTk):
         self.font_size = 20
 
         self.password = ""
+        self.tag_combobox = ""
 
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         self.theme_icon_path = os.path.join(BASE_DIR, "icons/theme_icon.png")
@@ -40,11 +41,18 @@ class NoteTakingApp(ctk.CTk):
         self.note_entry = ctk.CTkTextbox(
             self,
             width=500,
-            height=300,
+            height=250,
             border_width=1,
             corner_radius=10
         )
         self.note_entry.pack(pady=10)
+
+        self.tag_combobox = ctk.CTkComboBox(
+            self,
+            values=["None", "Personal", "Work", "Interest", "Shopping", "Reminders", "Other"],
+        )
+        self.tag_combobox.set("None")
+        self.tag_combobox.pack(pady=10)
 
         self.save_note_button = ctk.CTkButton(
             self,
@@ -106,8 +114,8 @@ class NoteTakingApp(ctk.CTk):
 
         self.warning_label = ctk.CTkLabel(
             self,
-            text="Don't forget to press the 'Update Note' button after each change!",
-            font=("Helvetica", 15),
+            text="Don't forget to press the 'Update Note' button and select the tag after each change!",
+            font=("Helvetica", 13),
             text_color="yellow"
         )
 
@@ -141,6 +149,8 @@ class NoteTakingApp(ctk.CTk):
         note_font = self.font
         note_font_size = self.font_size
 
+        note_tag = self.tag_combobox.get()
+
         note_password = self.password
 
         if note_title.strip() == "":
@@ -152,7 +162,7 @@ class NoteTakingApp(ctk.CTk):
             os.makedirs(notes_directory)
 
         note_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        note_data = f"Title: {note_title}\nDate: {note_date}\nFont: {note_font}\nFont Size: {note_font_size}\nPassword: {note_password}\n\n{note_content}"
+        note_data = f"Title: {note_title}\nDate: {note_date}\nFont: {note_font}\nFont Size: {note_font_size}\nPassword: {note_password}\nTag: {note_tag}\n\n{note_content}"
 
         with open(os.path.join(notes_directory, note_title + ".txt"), "w") as file:
             file.write(note_data)
@@ -160,6 +170,8 @@ class NoteTakingApp(ctk.CTk):
         self.result_label.configure(text="Note Saved!", text_color="#03c000")
         
         self.password = ""
+        #self.tag_combobox = "None"
+        self.tag_combobox.set("None")
 
         self.title_note_entry.delete(0, END)
         self.note_entry.delete("1.0", END)
@@ -287,25 +299,39 @@ class NoteTakingApp(ctk.CTk):
                 if len(lines) > 1:
                     note_title = lines[0].replace("Title: ", "").strip()
                     note_date = lines[1].replace("Date: ", "").strip()
+                    note_tag = lines[5].replace("Tag: ", "").strip()
                 else:
                     note_title = file_name.strip(".txt")
                     note_date = "Unknown"
+                    note_tag = ""
             
-            notes.append((file_name, note_title, note_date))
+            notes.append((file_name, note_title, note_date, note_tag))
 
         notes.sort(key=lambda x: x[2] if x[2] != "Unknown" else "9999-12-31")
         
         if window is None:
             window = ctk.CTkToplevel(self)
             window.title("Note List")
-            window.geometry("400x300")
+            window.geometry("500x300")
         
         self.window = window
 
-        notes_scrollable_frame = ctk.CTkScrollableFrame(window, width=360, height=260)
+        notes_scrollable_frame = ctk.CTkScrollableFrame(window, width=460, height=260)
         notes_scrollable_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
-        for i, (file_name, note_title, note_date) in enumerate(notes, start=1):
+        note_number_header = ctk.CTkLabel(notes_scrollable_frame, text="No", font=("Helvetica", 12, "bold"))
+        note_number_header.grid(row=0, column=0, padx=10, pady=5)
+
+        note_title_header = ctk.CTkLabel(notes_scrollable_frame, text="Title", font=("Helvetica", 12, "bold"))
+        note_title_header.grid(row=0, column=1, padx=10, pady=5)
+
+        note_date_header = ctk.CTkLabel(notes_scrollable_frame, text="Date", font=("Helvetica", 12, "bold"))
+        note_date_header.grid(row=0, column=2, padx=10, pady=5)
+
+        note_tag_header = ctk.CTkLabel(notes_scrollable_frame, text="Tag", font=("Helvetica", 12, "bold"))
+        note_tag_header.grid(row=0, column=3, padx=10, pady=5)
+
+        for i, (file_name, note_title, note_date, note_tag) in enumerate(notes, start=1):
             note_number_label = ctk.CTkLabel(notes_scrollable_frame, text=str(i) + ":")
             note_number_label.grid(row=i, column=0, padx=10, pady=5, sticky="w")
 
@@ -314,6 +340,9 @@ class NoteTakingApp(ctk.CTk):
 
             note_date_label = ctk.CTkLabel(notes_scrollable_frame, text=note_date)
             note_date_label.grid(row=i, column=2, padx=10, pady=5)
+
+            note_tag_label = ctk.CTkLabel(notes_scrollable_frame, text=note_tag)
+            note_tag_label.grid(row=i, column=3, padx=10, pady=5)
 
             edit_icon = PhotoImage(file=self.edit_icon_path)
             edit_icon = edit_icon.subsample(25, 25)
@@ -327,7 +356,7 @@ class NoteTakingApp(ctk.CTk):
                 hover_color="#099200",
                 width=30
             )
-            edit_button.grid(row=i, column=3, padx=10, pady=5)
+            edit_button.grid(row=i, column=4, padx=10, pady=5)
 
             delete_icon = PhotoImage(file=self.delete_icon_path)
             delete_icon = delete_icon.subsample(25, 25)
@@ -341,7 +370,7 @@ class NoteTakingApp(ctk.CTk):
                 hover_color="#960000",
                 width=30
             )
-            delete_button.grid(row=i, column=4, padx=10, pady=5)
+            delete_button.grid(row=i, column=5, padx=10, pady=5)
 
     def edit_note(self, file_name):
         notes_directory = "notes/"
@@ -354,13 +383,16 @@ class NoteTakingApp(ctk.CTk):
                     note_font = lines[2].replace("Font: ", "").strip()
                     note_font_size = lines[3].replace("Font Size: ", "").strip()
                     note_password = lines[4].replace("Password: ", "").strip()
+                    note_tag = lines[5].replace("Tag: ", "").strip()
 
                     self.password = note_password
+                    #self.tag_combobox = note_tag
+                    self.tag_combobox.set(note_tag)
                     
                     self.note_entry.configure(font=(note_font, int(note_font_size)))
 
                     note_title = lines[0].replace("Title: ", "").strip()
-                    note_content = "".join(lines[6:])
+                    note_content = "".join(lines[7:])
 
                 self.title_note_entry.delete(0, END)
                 self.title_note_entry.insert(0, note_title)
@@ -394,6 +426,9 @@ class NoteTakingApp(ctk.CTk):
         note_font = self.font
         note_font_size = self.font_size
 
+        note_tag = self.tag_combobox.get()
+        #note_tag = self.tag_combobox
+        
         note_password = self.password
 
         if note_title.strip() == "":
@@ -404,7 +439,7 @@ class NoteTakingApp(ctk.CTk):
         file_path = os.path.join(notes_directory, file_name)
 
         note_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        note_data = f"Title: {note_title}\nDate: {note_date}\nFont: {note_font}\nFont Size: {note_font_size}\nPassword: {note_password}\n\n{note_content}"
+        note_data = f"Title: {note_title}\nDate: {note_date}\nFont: {note_font}\nFont Size: {note_font_size}\nPassword: {note_password}\nTag: {note_tag}\n\n{note_content}"
 
         with open(file_path, "w") as file:
             file.write(note_data)
