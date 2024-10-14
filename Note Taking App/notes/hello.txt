@@ -1,6 +1,0 @@
-Title: hello
-Date: 2024-10-13 17:23:31
-Font: Helvetica
-Font Size: 14
-
-it's me

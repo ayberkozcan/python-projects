@@ -17,6 +17,8 @@ class NoteTakingApp(ctk.CTk):
         self.font = "Helvetica"
         self.font_size = 20
 
+        self.password = ""
+
         BASE_DIR = os.path.dirname(os.path.abspath(__file__))
         self.theme_icon_path = os.path.join(BASE_DIR, "icons/theme_icon.png")
         self.edit_icon_path = os.path.join(BASE_DIR, "icons/edit_icon.png")
@@ -25,19 +27,6 @@ class NoteTakingApp(ctk.CTk):
         self.widgets()
 
     def widgets(self):
-        theme_icon = PhotoImage(file=self.theme_icon_path)
-        theme_icon = theme_icon.subsample(8, 8)
-
-        self.theme_button = ctk.CTkButton(
-            self,
-            image=theme_icon,
-            text="",
-            command=self.switch_theme,
-            width=40,
-            height=40
-        )
-        self.theme_button.place(x=490, y=600)
-        
         self.title_note_entry = ctk.CTkEntry(
             self,
             placeholder_text="Title...",
@@ -47,7 +36,7 @@ class NoteTakingApp(ctk.CTk):
             corner_radius=10
         )
         self.title_note_entry.pack(pady=20)
-        
+
         self.note_entry = ctk.CTkTextbox(
             self,
             width=500,
@@ -60,22 +49,13 @@ class NoteTakingApp(ctk.CTk):
         self.save_note_button = ctk.CTkButton(
             self,
             text="Save Note",
-            fg_color="#0bb200",
-            hover_color="#099200",
+            fg_color="#28a745",
+            hover_color="#218838",
             command=self.create_note,
             width=50,
             height=50
         )
         self.save_note_button.place(x=50, y=420)
-
-        self.list_notes_button = ctk.CTkButton(
-            self,
-            text="Note List",
-            command=self.list_manage_notes,
-            width=50,
-            height=50
-        )
-        self.list_notes_button.place(x=490, y=420)
 
         self.customize_button = ctk.CTkButton(
             self,
@@ -95,6 +75,28 @@ class NoteTakingApp(ctk.CTk):
         )
         self.clear_screen_button.place(x=250, y=420)
 
+        self.set_password_button = ctk.CTkButton(
+            self,
+            text="Set Password",
+            fg_color="#6c757d",
+            hover_color="#5a6268",
+            command=self.set_password_window,
+            width=50,
+            height=50
+        )
+        self.set_password_button.place(x=350, y=420)
+
+        self.list_notes_button = ctk.CTkButton(
+            self,
+            text="Note List",
+            fg_color="#17a2b8",
+            hover_color="#138496",
+            command=self.list_manage_notes,
+            width=50,
+            height=50
+        )
+        self.list_notes_button.place(x=490, y=420)
+
         self.result_label = ctk.CTkLabel(
             self,
             text="",
@@ -108,6 +110,21 @@ class NoteTakingApp(ctk.CTk):
             font=("Helvetica", 15),
             text_color="yellow"
         )
+
+        theme_icon = PhotoImage(file=self.theme_icon_path)
+        theme_icon = theme_icon.subsample(8, 8)
+
+        self.theme_button = ctk.CTkButton(
+            self,
+            image=theme_icon,
+            text="",
+            command=self.switch_theme,
+            width=40,
+            height=40,
+            fg_color="#4A90E2",
+            hover_color="#357ABD"
+        )
+        self.theme_button.place(x=490, y=600)
         
     def switch_theme(self):
         if self.current_theme == "dark":
@@ -124,6 +141,8 @@ class NoteTakingApp(ctk.CTk):
         note_font = self.font
         note_font_size = self.font_size
 
+        note_password = self.password
+
         if note_title.strip() == "":
             self.result_label.configure(text="Title is required!", text_color="red")
             return
@@ -133,18 +152,70 @@ class NoteTakingApp(ctk.CTk):
             os.makedirs(notes_directory)
 
         note_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        note_data = f"Title: {note_title}\nDate: {note_date}\nFont: {note_font}\nFont Size: {note_font_size}\n\n{note_content}"
+        note_data = f"Title: {note_title}\nDate: {note_date}\nFont: {note_font}\nFont Size: {note_font_size}\nPassword: {note_password}\n\n{note_content}"
 
         with open(os.path.join(notes_directory, note_title + ".txt"), "w") as file:
             file.write(note_data)
 
         self.result_label.configure(text="Note Saved!", text_color="#03c000")
         
+        self.password = ""
+
         self.title_note_entry.delete(0, END)
         self.note_entry.delete("1.0", END)
 
         self.after(1000, self.clear_message)
 
+    def set_password_window(self):
+        self.password_window = ctk.CTkToplevel(self)
+        self.password_window.title("Set Password")
+        self.password_window.geometry("250x250")
+
+        self.password_window.grid_columnconfigure(0, weight=1)
+        self.password_window.grid_columnconfigure(2, weight=1)
+
+        set_password_label = ctk.CTkLabel(
+            self.password_window,
+            text="Password"
+        )
+        set_password_label.grid(row=0, column=1, padx=10, pady=10)
+
+        self.set_password_entry = ctk.CTkEntry(
+            self.password_window,
+            placeholder_text="...",
+            width=200,
+            height=30,
+            border_width=1,
+            corner_radius=10
+        )
+        self.set_password_entry.grid(row=1, column=1, padx=10, pady=10)
+
+        self.set_password_result_label = ctk.CTkLabel(
+            self.password_window,
+            text="",
+            font=("Helvetica", 14)
+        )
+        self.set_password_result_label.grid(row=2, column=1, padx=10, pady=10)
+
+        self.set_password_confirm_button = ctk.CTkButton(
+            self.password_window,
+            text="Confirm",
+            command=self.set_password,
+        )
+        self.set_password_confirm_button.grid(row=3, column=1, padx=10, pady=10)
+
+    def set_password(self):
+        note_password_control = self.set_password_entry.get()
+
+        if note_password_control == "":
+            self.set_password_result_label.configure(text="Password cannot be empty!", text_color="red")
+            self.set_password_result_label.after(3000, self.password_clear_message)     
+
+        else:
+            self.password = note_password_control
+            self.set_password_result_label.configure(text="Password saved!", text_color="green")
+            self.set_password_result_label.after(3000, self.password_window.destroy)
+            
     def customize_text(self):
         window = ctk.CTkToplevel(self)
         window.title("Customize")
@@ -282,11 +353,14 @@ class NoteTakingApp(ctk.CTk):
                 if len(lines) > 1:
                     note_font = lines[2].replace("Font: ", "").strip()
                     note_font_size = lines[3].replace("Font Size: ", "").strip()
+                    note_password = lines[4].replace("Password: ", "").strip()
+
+                    self.password = note_password
                     
                     self.note_entry.configure(font=(note_font, int(note_font_size)))
 
                     note_title = lines[0].replace("Title: ", "").strip()
-                    note_content = "".join(lines[5:])
+                    note_content = "".join(lines[6:])
 
                 self.title_note_entry.delete(0, END)
                 self.title_note_entry.insert(0, note_title)
@@ -298,6 +372,12 @@ class NoteTakingApp(ctk.CTk):
                 text="Update Note",
                 command=lambda: self.update_existing_note(file_name)
             )
+
+            self.set_password_button.configure(
+                text="Change Password",
+                command=self.set_password_window
+            )
+
             self.warning_label.place(x=50, y=620)
             self.warning_label.after(4000, self.warning_clear_message)
 
@@ -314,6 +394,8 @@ class NoteTakingApp(ctk.CTk):
         note_font = self.font
         note_font_size = self.font_size
 
+        note_password = self.password
+
         if note_title.strip() == "":
             self.result_label.configure(text="Title is required!", text_color="red")
             return
@@ -322,7 +404,7 @@ class NoteTakingApp(ctk.CTk):
         file_path = os.path.join(notes_directory, file_name)
 
         note_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        note_data = f"Title: {note_title}\nDate: {note_date}\nFont: {note_font}\nFont Size: {note_font_size}\n\n{note_content}"
+        note_data = f"Title: {note_title}\nDate: {note_date}\nFont: {note_font}\nFont Size: {note_font_size}\nPassword: {note_password}\n\n{note_content}"
 
         with open(file_path, "w") as file:
             file.write(note_data)
@@ -366,6 +448,9 @@ class NoteTakingApp(ctk.CTk):
 
     def font_clear_message(self):
         self.font_result_label.configure(text="")
+
+    def password_clear_message(self):
+        self.set_password_result_label.configure(text="")
 
     def clear_screen(self):
         self.title_note_entry.delete(0, END)

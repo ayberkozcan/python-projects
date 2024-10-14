@@ -1,6 +1,0 @@
-Title: 2
-Date: 2024-10-13 16:53:08
-Font: Helvetica
-Font Size: 40
-
-This is a test too

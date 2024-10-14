@@ -1,0 +1,7 @@
+Title: note1
+Date: 2024-10-14 12:11:45
+Font: Arial
+Font Size: 40
+Password: this
+
+hello
