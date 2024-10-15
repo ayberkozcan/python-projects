@@ -44,7 +44,7 @@ def show_previous_data():
             widget.place_forget()
         
     homepage_icon = PhotoImage(file=homepage_icon_path)
-    homepage_icon = homepage_icon.subsample(9, 9)
+    homepage_icon = homepage_icon.subsample(10, 10)
 
     homepage_button = customtkinter.CTkButton(master=root, image=homepage_icon, text="", command=show_homepage, width=40, height=40)
     homepage_button.place(x=500, y=40)
@@ -237,7 +237,7 @@ def plot_weight_over_time(df, parent_frame):
 
 # Switch Theme
 theme_icon = PhotoImage(file=theme_icon_path)
-theme_icon = theme_icon.subsample(7, 7)
+theme_icon = theme_icon.subsample(10, 10)
 
 theme_button = customtkinter.CTkButton(master=root, 
     image=theme_icon, 
@@ -249,7 +249,7 @@ theme_button.place(x=50, y=40)
 
 # Records
 records_icon = PhotoImage(file=history_icon_path)
-records_icon = records_icon.subsample(9, 9)
+records_icon = records_icon.subsample(10, 10)
 
 records_button = customtkinter.CTkButton(master=root, 
     image=records_icon, 

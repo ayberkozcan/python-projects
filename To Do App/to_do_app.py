@@ -112,10 +112,26 @@ class ToDoApp(ctk.CTk):
                     task_label.grid(row=i, column=0, padx=10, pady=5, sticky='w')
                     self.task_labels.append(task_label)
 
-                    completed_button = ctk.CTkButton(master=self.records_frame, image=self.confirmation_icon, text="", command=lambda idx=i: self.complete_task(idx), width=30)
+                    completed_button = ctk.CTkButton(
+                        master=self.records_frame, 
+                        image=self.confirmation_icon, 
+                        text="", 
+                        command=lambda idx=i: self.complete_task(idx), 
+                        fg_color="green",
+                        hover_color="#005f00",  
+                        width=30
+                        )
                     completed_button.grid(row=i, column=1, padx=10, pady=5)
 
-                    delete_button = ctk.CTkButton(master=self.records_frame, image=self.trash_can_icon, text="", command=lambda idx=i: self.delete_task(idx), fg_color="red", width=30)
+                    delete_button = ctk.CTkButton(
+                        master=self.records_frame, 
+                        image=self.trash_can_icon, 
+                        text="", 
+                        command=lambda idx=i: self.delete_task(idx), 
+                        fg_color="red", 
+                        hover_color="#a40000",
+                        width=30
+                        )
                     delete_button.grid(row=i, column=2, padx=10, pady=5)
 
             else:
@@ -150,7 +166,7 @@ class ToDoApp(ctk.CTk):
         self.header_homepage.pack(pady=50)
 
         theme_icon = PhotoImage(file=self.theme_icon_path)
-        theme_icon = theme_icon.subsample(8, 8)
+        theme_icon = theme_icon.subsample(10, 10)
 
         self.theme_button = ctk.CTkButton(
             self,

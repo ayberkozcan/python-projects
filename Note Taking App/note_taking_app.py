@@ -122,7 +122,7 @@ class NoteTakingApp(ctk.CTk):
         )
 
         theme_icon = PhotoImage(file=self.theme_icon_path)
-        theme_icon = theme_icon.subsample(8, 8)
+        theme_icon = theme_icon.subsample(10, 10)
 
         self.theme_button = ctk.CTkButton(
             self,
