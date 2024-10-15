@@ -1,8 +1,8 @@
 Title: smallnote
-Date: 2024-10-14 15:49:28
+Date: 2024-10-15 12:33:25
 Font: Tahoma
 Font Size: 12
-Password: is
+Password: b
 Tag: Work
 
 This is my small tahoma note

@@ -1,7 +1,7 @@
 Title: bignote
-Date: 2024-10-14 18:25:06
-Font: Helvetica
-Font Size: 20
+Date: 2024-10-15 12:32:49
+Font: Arial
+Font Size: 40
 Password: 
 Tag: Reminders
 
