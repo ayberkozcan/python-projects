@@ -2,6 +2,7 @@ from tkinter import *
 import customtkinter as ctk
 import os
 from datetime import datetime
+from PIL import Image
 
 class NoteTakingApp(ctk.CTk):
     def __init__(self):
@@ -26,6 +27,7 @@ class NoteTakingApp(ctk.CTk):
         self.theme_icon_path = os.path.join(BASE_DIR, "icons/theme_icon.png")
         self.edit_icon_path = os.path.join(BASE_DIR, "icons/edit_icon.png")
         self.delete_icon_path = os.path.join(BASE_DIR, "icons/bin_icon.png")
+        self.lock_icon_path = os.path.join(BASE_DIR, "icons/lock_icon.png")
 
         self.widgets()
 
@@ -117,7 +119,7 @@ class NoteTakingApp(ctk.CTk):
         self.warning_label = ctk.CTkLabel(
             self,
             text="Don't forget to press the 'Update Note' button and select the tag after each change!",
-            font=("Helvetica", 13),
+            font=("Helvetica", 11),
             text_color="yellow"
         )
 
@@ -302,23 +304,24 @@ class NoteTakingApp(ctk.CTk):
                     note_title = lines[0].replace("Title: ", "").strip()
                     note_date = lines[1].replace("Date: ", "").strip()
                     note_tag = lines[5].replace("Tag: ", "").strip()
+                    note_password = lines[4].replace("Password: ", "").strip()
                 else:
                     note_title = file_name.strip(".txt")
                     note_date = "Unknown"
                     note_tag = ""
             
-            notes.append((file_name, note_title, note_date, note_tag))
+            notes.append((file_name, note_title, note_date, note_tag, note_password))
 
         notes.sort(key=lambda x: x[2] if x[2] != "Unknown" else "9999-12-31")
         
         if window is None:
             window = ctk.CTkToplevel(self)
             window.title("Note List")
-            window.geometry("500x300")
+            window.geometry("550x300")
         
         self.window = window
 
-        notes_scrollable_frame = ctk.CTkScrollableFrame(window, width=460, height=260)
+        notes_scrollable_frame = ctk.CTkScrollableFrame(window, width=500, height=260)
         notes_scrollable_frame.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
         note_number_header = ctk.CTkLabel(notes_scrollable_frame, text="No", font=("Helvetica", 12, "bold"))
@@ -333,7 +336,16 @@ class NoteTakingApp(ctk.CTk):
         note_tag_header = ctk.CTkLabel(notes_scrollable_frame, text="Tag", font=("Helvetica", 12, "bold"))
         note_tag_header.grid(row=0, column=3, padx=10, pady=5)
 
-        for i, (file_name, note_title, note_date, note_tag) in enumerate(notes, start=1):
+        note_edit_header = ctk.CTkLabel(notes_scrollable_frame, text="Edit", font=("Helvetica", 12, "bold"))
+        note_edit_header.grid(row=0, column=4, padx=10, pady=5)
+
+        note_delete_header = ctk.CTkLabel(notes_scrollable_frame, text="Delete", font=("Helvetica", 12, "bold"))
+        note_delete_header.grid(row=0, column=5, padx=10, pady=5)
+
+        note_access_header = ctk.CTkLabel(notes_scrollable_frame, text="Access", font=("Helvetica", 12, "bold"))
+        note_access_header.grid(row=0, column=6, padx=10, pady=5)
+
+        for i, (file_name, note_title, note_date, note_tag, note_password) in enumerate(notes, start=1):
             note_number_label = ctk.CTkLabel(notes_scrollable_frame, text=str(i) + ":")
             note_number_label.grid(row=i, column=0, padx=10, pady=5, sticky="w")
 
@@ -373,6 +385,21 @@ class NoteTakingApp(ctk.CTk):
                 width=30
             )
             delete_button.grid(row=i, column=5, padx=10, pady=5)
+
+            lock_image = ctk.CTkImage(
+                light_image=Image.open('icons/lock_icon.png'),
+                dark_image=Image.open('icons/lock_icon.png'),
+                size=(25,25)
+            )
+
+            lock_label = ctk.CTkLabel(
+                notes_scrollable_frame, 
+                text="", 
+                image=lock_image
+            )
+
+            if note_password != "":
+                lock_label.grid(row=i, column=6, padx=10, pady=5)
 
     def edit_note(self, file_name):
         notes_directory = "notes/"
